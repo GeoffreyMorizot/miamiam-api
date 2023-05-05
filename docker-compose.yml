@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  miamiam-api:
+    build: .
+    ports:
+      - '3333:3333'
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development

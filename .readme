@@ -1,0 +1,15 @@
+#Mia Mia!
+
+## Start the project
+
+To start the project for the first time or if you have updated docker files
+
+```sh
+docker compose up --build
+```
+
+If docker image is already build
+
+```sh
+docker compose up
+```
