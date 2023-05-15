@@ -19,5 +19,27 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+import HealthCheck from '@ioc:Adonis/Core/HealthCheck'
 
-Route.resource('users', 'UsersController').apiOnly()
+Route.group(() => {
+  Route.group(() => {
+    Route.group(() => {
+      Route.post('auth/register', 'AuthController.register')
+      Route.post('auth/login', 'AuthController.login')
+      Route.get('auth/check', 'AuthController.check')
+    })
+  })
+
+  Route.group(() => {
+    Route.resource('users', 'UsersController')
+      .apiOnly()
+      .only(['index', 'show', 'update', 'destroy'])
+    Route.get('auth/me', 'AuthController.me')
+    Route.delete('auth/logout', 'AuthController.logout')
+  }).middleware('auth')
+}).prefix('api')
+
+Route.get('/health', async ({ response }) => {
+  const report = await HealthCheck.getReport()
+  return report.healthy ? response.ok(report) : response.badRequest(report)
+})

@@ -9,3 +9,44 @@ services:
       - .:/app
     environment:
       - NODE_ENV=development
+    depends_on:
+      - miamiam-db
+    networks: # Ajout d'un réseau pour connecter les services
+      - miamiam-network
+
+  miamiam-db:
+    image: mysql:5.7
+    container_name: miamiam-db
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    platform: linux/amd64 #for platform error on Apple M1 chips
+    restart: always
+    healthcheck:
+      test: ['CMD', 'curl', '-fk', 'tcp://localhost:3306']
+      interval: 300s
+      timeout: 400s
+      retries: 10
+    env_file: .env
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    networks: # Ajout d'un réseau pour connecter les services
+      - miamiam-network
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+    networks: # Ajout d'un réseau pour connecter les services
+      - miamiam-network
+
+networks: # Définition du réseau
+  miamiam-network:

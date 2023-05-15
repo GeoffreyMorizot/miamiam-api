@@ -1,23 +1,27 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import User from 'App/Models/User'
 
 export default class UsersController {
-  private users = [
-    {
-      id: 1,
-      name: 'John Doe',
-    },
-    {
-      id: 2,
-      name: 'Jane Doe',
-    },
-    {
-      id: 3,
-      name: 'Jeff Bezos',
-    },
-  ]
-
   public async index() {
-    console.log('index')
-    return this.users
+    return User.all()
+  }
+
+  public async show({ params }: HttpContextContract) {
+    const user = await User.findOrFail(params.id)
+    return user
+  }
+
+  public async update({ params, request }: HttpContextContract) {
+    const user = await User.findOrFail(params.id)
+    user.merge(request.only(['email', 'password']))
+    await user.save()
+    return user
+  }
+
+  public async destroy({ params, auth, response }: HttpContextContract) {
+    const user = await User.findOrFail(params.id)
+    const isAuthUser = user.id === auth.user?.id
+    if (!isAuthUser) response.unauthorized()
+    await user.delete()
   }
 }
