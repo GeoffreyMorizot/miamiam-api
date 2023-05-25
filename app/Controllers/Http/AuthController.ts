@@ -4,27 +4,46 @@ import CreateUserValidator from 'App/Validators/auth/CreateUserValidator'
 
 export default class AuthController {
   public async register({ request, auth, response }: HttpContextContract) {
+    console.log(request.body())
     const payload = await request.validate(CreateUserValidator)
     const user = await User.create(payload)
-    const { token } = await auth.login(user)
-    console.log(token)
+    const login = await auth.login(user)
+    console.log(user)
     return response.created({
-      token,
-      ...user.serialize(),
+      token: {
+        type: login.type,
+        token: login.token,
+      },
+      ...user.serialize({
+        relations: {
+          roles: {
+            fields: ['id'],
+          },
+        },
+      }),
     })
   }
 
   public async login({ auth, request, response }: HttpContextContract) {
-    const email: string = request.input('email')
-    const password: string = request.input('password')
-
+    const { email, password, rememberMe } = request.only(['email', 'password', 'rememberMe'])
     try {
-      const token = await auth.attempt(email, password)
+      const token = await auth.attempt(email, password, !!rememberMe)
       const user = auth.user!
-
+      /* response.cookie('token', token.token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+      }) */
+      console.log(user)
       return response.ok({
         token,
-        ...user,
+        ...user.serialize({
+          relations: {
+            roles: {
+              fields: ['id'],
+            },
+          },
+        }),
       })
     } catch {
       return response.badRequest('Invalid credentials')
@@ -32,11 +51,12 @@ export default class AuthController {
   }
 
   public async logout({ auth, response }: HttpContextContract) {
+    console.log('logout')
     await auth.logout()
     return response.noContent()
   }
 
-  public async me({ auth }: HttpContextContract) {
+  public me({ auth }: HttpContextContract) {
     return auth.user
   }
 

@@ -22,7 +22,6 @@ export default class CreateUserValidator {
     'email.email': 'Your email is not valid.',
     'password.required': 'You need to specify a password.',
     'password.minLength': 'Your password needs to be at least 8 characters long.',
-    'password.maxLength': 'Your password cannot be longer than 30 characters.',
     'password_confirmation.confirmed': 'Passwords do not match.',
   }
 }

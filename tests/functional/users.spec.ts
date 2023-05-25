@@ -180,4 +180,17 @@ test.group('Users | Register', (group) => {
       ],
     })
   })
+
+  //test that a user has been created with the default role value at 1
+  test('should create a user with the default role value at user', async ({ client }) => {
+    const response = await client.post('/api/auth/register').json({
+      email: 'geoffrey@example.com',
+      password: 'secret1234',
+      password_confirmation: 'secret1234',
+    })
+    console.log(response)
+    response.assertBodyContains({
+      isAdmin: false,
+    })
+  })
 })
