@@ -7,7 +7,7 @@ export default class UsersController {
   }
 
   public async show({ params }: HttpContextContract) {
-    const user = await User.findOrFail(params.id)
+    const user = User.query().preload('role').where('id', params.id).firstOrFail()
     return user
   }
 
